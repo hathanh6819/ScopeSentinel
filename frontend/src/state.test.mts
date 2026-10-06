@@ -1,0 +1,4 @@
+import test from'node:test';import assert from'node:assert/strict';import{canActivate,canAssess,isReviewCandidate,isTerminal,statusTone}from'./state.ts';
+test('actions follow authoritative phases',()=>{assert.equal(canAssess('REVISION_PROPOSED'),true);assert.equal(canAssess('ACTIVE'),false);assert.equal(canActivate('CERTIFIED'),true);assert.equal(canActivate('BLOCKED'),false)});
+test('terminal and tones are explicit',()=>{assert.equal(isTerminal('SUPERSEDED'),true);assert.equal(statusTone('BLOCKED'),'bad');assert.equal(statusTone('CONSENSUS_UNRESOLVED'),'warn')});
+test('workbench excludes active history from the review gate',()=>{assert.equal(isReviewCandidate('SUPERSEDED'),false);assert.equal(isReviewCandidate('ACTIVE'),false);assert.equal(isReviewCandidate('CERTIFIED'),true);assert.equal(isReviewCandidate('BLOCKED'),true)});
