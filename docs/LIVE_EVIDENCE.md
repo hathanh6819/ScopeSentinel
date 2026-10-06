@@ -4,6 +4,7 @@
 
 - Network: GenLayer Studio Next (`chain_id 61997`)
 - Active contract: [`0xA198744fd4A6479019EEea2E27195f8546EDB176`](https://explorer-studio-dev.genlayer.com/address/0xA198744fd4A6479019EEea2E27195f8546EDB176)
+- Production frontend: [scope-sentinel.thanhha68199.workers.dev](https://scope-sentinel.thanhha68199.workers.dev)
 - Deployment transaction: [`0x098fa9cc...0028ea`](https://explorer-studio-dev.genlayer.com/transactions/0x098fa9ccdda02602f6ce01d8aa9e5ffc7765255700d18fb5faed8f06fe0028ea)
 - Creator/test wallet A: `0x1D283b45974B0be9630DFD1deC6A62a9B72B2760`
 - Independent reviewer/test wallet B: `0xf96Cf822F9f4e76956AB9fAAa22B3BdCD7b10aD6`

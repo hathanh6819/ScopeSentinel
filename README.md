@@ -2,7 +2,8 @@
 
 ScopeSentinel is a GenLayer dApp that prevents a DAO proposal revision from becoming canonical when its human change summary hides a material semantic or executable change.
 
-**Live release:** [`0xA198744fd4A6479019EEea2E27195f8546EDB176`](https://explorer-studio-dev.genlayer.com/address/0xA198744fd4A6479019EEea2E27195f8546EDB176) on GenLayer Studio Next. The complete finalized two-wallet transaction trail and state readbacks are in [`docs/LIVE_EVIDENCE.md`](docs/LIVE_EVIDENCE.md).
+**Live app:** [scope-sentinel.thanhha68199.workers.dev](https://scope-sentinel.thanhha68199.workers.dev)  
+**Live contract:** [`0xA198744fd4A6479019EEea2E27195f8546EDB176`](https://explorer-studio-dev.genlayer.com/address/0xA198744fd4A6479019EEea2E27195f8546EDB176) on GenLayer Studio Next. The complete finalized two-wallet transaction trail and state readbacks are in [`docs/LIVE_EVIDENCE.md`](docs/LIVE_EVIDENCE.md).
 
 The contract seals exact parent/revision text and bounded action manifests on-chain. Deterministic code compares target, selector, recipient, asset, value, amount, and action count. Validators judge only whether the prose summary completely discloses semantic changes. Only the proposal creator can activate a certified child of the currently active revision.
 
