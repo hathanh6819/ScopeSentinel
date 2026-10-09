@@ -4,7 +4,8 @@ ScopeSentinel is a GenLayer dApp that prevents a DAO proposal revision from beco
 
 **Live app:** [scope-sentinel-frontend.thanhha68199.workers.dev](https://scope-sentinel-frontend.thanhha68199.workers.dev)
 
-**Live V2 guard:** [`0x944ED2e5D14C81c3D1Cb0B09efd7e091C3013885`](https://explorer-studio-dev.genlayer.com/address/0x944ED2e5D14C81c3D1Cb0B09efd7e091C3013885)  
+**Live V2 guard:** [`0x944ED2e5D14C81c3D1Cb0B09efd7e091C3013885`](https://explorer-studio-dev.genlayer.com/address/0x944ED2e5D14C81c3D1Cb0B09efd7e091C3013885)
+
 **Bound executor:** [`0xF6c1Df76C59244268af9D5608486740DBe50D109`](https://explorer-studio-dev.genlayer.com/address/0xF6c1Df76C59244268af9D5608486740DBe50D109)
 
 The complete V2 two-wallet trail and downstream execution readback are in [`docs/LIVE_EVIDENCE.md`](docs/LIVE_EVIDENCE.md).
