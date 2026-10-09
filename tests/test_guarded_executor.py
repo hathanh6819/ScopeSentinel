@@ -23,4 +23,4 @@ def test_executor_rejects_malformed_authorization(runtime):
 def test_constructor_schema_uses_studio_visible_string_input():
     source=Path("contracts/guarded_executor.py").read_text(encoding="utf-8")
     assert "def __init__(self,guard:str)" in source
-    assert source.count("TreeMap[str,str]")==2 and "allocations:TreeMap" not in source
+    assert source.count("TreeMap[str,str]")==2 and "TreeMap[u256,str]" not in source and "allocations:TreeMap" not in source

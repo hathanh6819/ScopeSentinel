@@ -18,11 +18,10 @@ class GuardedScopeExecutor(gl.Contract):
     guard:str
     execution_count:u256
     indexes:TreeMap[str,str]
-    executions:TreeMap[u256,str]
     total_authorized:u256
     def __init__(self,guard:str):
         value=addr(guard);require(ADDRESS.fullmatch(value) is not None and value!="0x"+"0"*40,"INVALID_GUARD")
-        self.guard=value;self.execution_count=u256(0);self.indexes=TreeMap[str,str]();self.executions=TreeMap[u256,str]();self.total_authorized=u256(0)
+        self.guard=value;self.execution_count=u256(0);self.indexes=TreeMap[str,str]();self.total_authorized=u256(0)
     @gl.public.write
     def execute_authorized(self,proposal_id:u256,revision_id:u256,manifest_digest:str,action_json:str,authorization_receipt:str)->str:
         require(addr(gl.message.sender_address)==self.guard,"ONLY_SCOPE_SENTINEL")
@@ -36,13 +35,13 @@ class GuardedScopeExecutor(gl.Contract):
         require(ADDRESS.fullmatch(recipient) is not None and recipient!="0x"+"0"*40 and amount>=0,"INVALID_EFFECT")
         eid=u256(int(self.execution_count)+1);self.execution_count=eid
         record={"id":int(eid),"proposal_id":int(proposal_id),"revision_id":int(revision_id),"manifest_digest":manifest_digest,"authorization_receipt":authorization_receipt,"action":action,"status":"EXECUTED"}
-        self.executions[eid]=canon(record);self.indexes[receipt_key]=canon({"execution_id":int(eid),"digest":"sha256:"+hashlib.sha256(action_json.encode()).hexdigest()})
+        self.indexes["execution:"+str(int(eid))]=canon(record);self.indexes[receipt_key]=canon({"execution_id":int(eid),"digest":"sha256:"+hashlib.sha256(action_json.encode()).hexdigest()})
         allocation_key="allocation:"+recipient;previous=int(self.indexes[allocation_key]) if allocation_key in self.indexes else 0;self.indexes[allocation_key]=str(previous+amount);self.total_authorized=u256(int(self.total_authorized)+amount)
         return "EXECUTED"
     @gl.public.view
     def get_execution(self,execution_id:u256)->dict:
         if int(execution_id)<1 or int(execution_id)>int(self.execution_count):return {}
-        return json.loads(self.executions[execution_id])
+        return json.loads(self.indexes["execution:"+str(int(execution_id))])
     @gl.public.view
     def get_allocation(self,recipient:str)->int:
         key="allocation:"+addr(recipient);return int(self.indexes[key]) if key in self.indexes else 0
