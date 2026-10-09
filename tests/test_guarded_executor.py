@@ -19,3 +19,7 @@ def test_only_bound_guard_can_execute_and_receipt_is_single_use(runtime):
 def test_executor_rejects_malformed_authorization(runtime):
     _,_,g,_,_=runtime;e=load_executor(g);set_sender(g,CREATOR)
     with pytest.raises(ValueError,match="INVALID_MANIFEST_DIGEST"):e.execute_authorized(1,2,"bad","{}","sha256:"+"b"*64)
+
+def test_constructor_schema_uses_studio_visible_string_input():
+    source=Path("contracts/guarded_executor.py").read_text(encoding="utf-8")
+    assert "def __init__(self,guard:str)" in source

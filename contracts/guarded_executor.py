@@ -21,7 +21,7 @@ class GuardedScopeExecutor(gl.Contract):
     executions:TreeMap[u256,str]
     allocations:TreeMap[str,u256]
     total_authorized:u256
-    def __init__(self,guard:Address):
+    def __init__(self,guard:str):
         value=addr(guard);require(ADDRESS.fullmatch(value) is not None and value!="0x"+"0"*40,"INVALID_GUARD")
         self.guard=value;self.execution_count=u256(0);self.receipts=TreeMap[str,str]();self.executions=TreeMap[u256,str]();self.allocations=TreeMap[str,u256]();self.total_authorized=u256(0)
     @gl.public.write
@@ -45,7 +45,7 @@ class GuardedScopeExecutor(gl.Contract):
         if int(execution_id)<1 or int(execution_id)>int(self.execution_count):return {}
         return json.loads(self.executions[execution_id])
     @gl.public.view
-    def get_allocation(self,recipient:Address)->int:
+    def get_allocation(self,recipient:str)->int:
         key=addr(recipient);return int(self.allocations[key]) if key in self.allocations else 0
     @gl.public.view
     def get_info(self)->dict:return {"name":"GuardedScopeExecutor","guard":self.guard,"execution_count":int(self.execution_count),"total_authorized":int(self.total_authorized)}
