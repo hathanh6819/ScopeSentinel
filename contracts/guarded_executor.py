@@ -19,11 +19,11 @@ class GuardedScopeExecutor(gl.Contract):
     execution_count:u256
     receipts:TreeMap[str,str]
     executions:TreeMap[u256,str]
-    allocations:TreeMap[str,u256]
+    allocations:TreeMap[str,str]
     total_authorized:u256
     def __init__(self,guard:str):
         value=addr(guard);require(ADDRESS.fullmatch(value) is not None and value!="0x"+"0"*40,"INVALID_GUARD")
-        self.guard=value;self.execution_count=u256(0);self.receipts=TreeMap[str,str]();self.executions=TreeMap[u256,str]();self.allocations=TreeMap[str,u256]();self.total_authorized=u256(0)
+        self.guard=value;self.execution_count=u256(0);self.receipts=TreeMap[str,str]();self.executions=TreeMap[u256,str]();self.allocations=TreeMap[str,str]();self.total_authorized=u256(0)
     @gl.public.write
     def execute_authorized(self,proposal_id:u256,revision_id:u256,manifest_digest:str,action_json:str,authorization_receipt:str)->str:
         require(addr(gl.message.sender_address)==self.guard,"ONLY_SCOPE_SENTINEL")
@@ -38,7 +38,7 @@ class GuardedScopeExecutor(gl.Contract):
         eid=u256(int(self.execution_count)+1);self.execution_count=eid
         record={"id":int(eid),"proposal_id":int(proposal_id),"revision_id":int(revision_id),"manifest_digest":manifest_digest,"authorization_receipt":authorization_receipt,"action":action,"status":"EXECUTED"}
         self.executions[eid]=canon(record);self.receipts[authorization_receipt]=canon({"execution_id":int(eid),"digest":"sha256:"+hashlib.sha256(action_json.encode()).hexdigest()})
-        previous=int(self.allocations[recipient]) if recipient in self.allocations else 0;self.allocations[recipient]=u256(previous+amount);self.total_authorized=u256(int(self.total_authorized)+amount)
+        previous=int(self.allocations[recipient]) if recipient in self.allocations else 0;self.allocations[recipient]=str(previous+amount);self.total_authorized=u256(int(self.total_authorized)+amount)
         return "EXECUTED"
     @gl.public.view
     def get_execution(self,execution_id:u256)->dict:
