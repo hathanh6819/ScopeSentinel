@@ -15,6 +15,6 @@
 7. Updated the frontend to collect the complete manifest and show queued-execution counts instead of presenting the app as a passive registry.
 8. Expanded tests for incomplete manifests, wrong-chain activation, zero mutation on failure, downstream message emission, execution-record creation, and replay protections. Current local result: 22 contract/adversarial tests, both GenVM lint targets, 3 frontend tests, and production build pass.
 
-## Evidence still required before resubmission
+## Completed release evidence
 
-Deploy the updated ScopeSentinel contract, deploy `GuardedScopeExecutor` with the new ScopeSentinel address, run the two-wallet happy/failure/adversarial/replay lifecycle, confirm the executor readback, update production to both active addresses, and replace the prior V1 transaction evidence. The older live address remains documented honestly and must not be presented as evidence for these V2 changes.
+The updated ScopeSentinel and GuardedScopeExecutor are deployed and constructor-bound. A finalized two-wallet lifecycle covered happy certification, downstream execution, stale assessment, unauthorized activation, replay, hidden material changes and blocked activation. Final readback is 2 proposals, 4 revisions, 2 assessments, 1 queued authorization, 1 downstream execution and total authorized allocation 1200. Exact explorer links are in `docs/LIVE_EVIDENCE.md`; production points to the V2 guard.

@@ -4,7 +4,7 @@
 
 | Layer | Command | Result |
 |---|---|---|
-| Contract direct/adversarial | `python -m pytest tests -q` | 24 passed |
+| Contract direct/adversarial | `python -m pytest tests -q` | 25 passed |
 | GenVM compatibility | lint `contracts/scope_sentinel.py` and `contracts/guarded_executor.py` | passed, 3 checks each |
 | Frontend state rules | `npm test` | 3 passed |
 | Production frontend | `npm run build` | passed |
@@ -43,4 +43,4 @@ Explorer links and readbacks: [`LIVE_EVIDENCE.md`](LIVE_EVIDENCE.md). Browser-wa
 
 ## V2 live release gate
 
-Pending new ScopeSentinel and GuardedScopeExecutor deployment, two-wallet E2E, downstream allocation readback, frontend address update, and Cloudflare publication.
+Passed on ScopeSentinel `0x944ED2e5D14C81c3D1Cb0B09efd7e091C3013885` and GuardedScopeExecutor `0xF6c1Df76C59244268af9D5608486740DBe50D109`. Two-wallet E2E finalized all 11 transactions, confirmed one queued authorization, one downstream `EXECUTED` record, allocation `1200`, and no mutation on stale, unauthorized, replay or blocked paths. See [`LIVE_EVIDENCE.md`](LIVE_EVIDENCE.md).

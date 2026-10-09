@@ -1,45 +1,53 @@
-# Live E2E Evidence
+# Live V2 E2E evidence
 
 ## Release identity
 
 - Network: GenLayer Studio Next (`chain_id 61997`)
-- Active contract: [`0xA198744fd4A6479019EEea2E27195f8546EDB176`](https://explorer-studio-dev.genlayer.com/address/0xA198744fd4A6479019EEea2E27195f8546EDB176)
-- Production frontend: [scope-sentinel.thanhha68199.workers.dev](https://scope-sentinel.thanhha68199.workers.dev)
-- Deployment transaction: [`0x098fa9cc...0028ea`](https://explorer-studio-dev.genlayer.com/transactions/0x098fa9ccdda02602f6ce01d8aa9e5ffc7765255700d18fb5faed8f06fe0028ea)
-- Creator/test wallet A: `0x1D283b45974B0be9630DFD1deC6A62a9B72B2760`
-- Independent reviewer/test wallet B: `0xf96Cf822F9f4e76956AB9fAAa22B3BdCD7b10aD6`
-- Executed: 2026-10-06
+- ScopeSentinel V2: [`0x944ED2e5D14C81c3D1Cb0B09efd7e091C3013885`](https://explorer-studio-dev.genlayer.com/address/0x944ED2e5D14C81c3D1Cb0B09efd7e091C3013885)
+- GuardedScopeExecutor: [`0xF6c1Df76C59244268af9D5608486740DBe50D109`](https://explorer-studio-dev.genlayer.com/address/0xF6c1Df76C59244268af9D5608486740DBe50D109)
+- Production frontend: [scope-sentinel-frontend.thanhha68199.workers.dev](https://scope-sentinel-frontend.thanhha68199.workers.dev)
+- Cloudflare version: `e84503f0-2856-46bd-9aa8-261cf7619933`
+- Creator wallet A: `0x1D283b45974B0be9630DFD1deC6A62a9B72B2760`
+- Independent reviewer wallet B: `0xf96Cf822F9f4e76956AB9fAAa22B3BdCD7b10aD6`
+- Executed: 2026-10-09
 
-The deployer did not receive a protocol role. Both test wallets are ordinary users. A steward can repeat the path with any wallet by creating a separate proposal.
+The deployer has no proposal role. Executor constructor state confirms its guard is the exact ScopeSentinel V2 address. Both contracts began with zero records.
 
 ## Finalized transaction trail
 
-| # | Actor | Operation and expected invariant | Explorer |
+| # | Actor | Operation and verified invariant | Explorer |
 |---:|---|---|---|
-| 1 | Wallet A | Create happy-path proposal baseline; proposal `1`, revision `1` becomes `ACTIVE` | [`0xa3b29f16...494448`](https://explorer-studio-dev.genlayer.com/transactions/0xa3b29f16cbefbb0712856bd535baff0f1ea5e4fcab5c4e2968f26a9871494448) |
-| 2 | Wallet B | Propose revision `2` against the exact active parent | [`0x18a5d263...d657a`](https://explorer-studio-dev.genlayer.com/transactions/0x18a5d263e7cf3893a17a5c07da2b980abdfc127311b39fb03d7b0077454d657a) |
-| 3 | Wallet B | Stale parent assessment rejected with `STALE_PROPOSAL_REVISION`; no state mutation | [`0xe3ea2a26...c13fd`](https://explorer-studio-dev.genlayer.com/transactions/0xe3ea2a26d434f19ed719639c3562ff6f48eb94d737a4f35784d8df14634c13fd) |
-| 4 | Wallet B | Assess exact revision; consensus `MAJORITY_AGREE`, decision `FULLY_DISCLOSED`, revision `CERTIFIED` | [`0x3601d33e...c2d27`](https://explorer-studio-dev.genlayer.com/transactions/0x3601d33e6bdd7767edcc21756ec3d9e26e93325fe165fc8f6a8a9dbfa50c2d27) |
-| 5 | Wallet B | Unauthorized activation rejected with `ONLY_PROPOSAL_CREATOR`; no mutation | [`0xbcf5e9fa...2a0d8`](https://explorer-studio-dev.genlayer.com/transactions/0xbcf5e9fad4e3c9daf4a50c1ba79dfa434cd5e9db4c01a85a048b63cd2322a0d8) |
-| 6 | Wallet A | Creator activates certified revision atomically; old revision `SUPERSEDED`, child `ACTIVE` | [`0x01fea134...d6b82`](https://explorer-studio-dev.genlayer.com/transactions/0x01fea134d6fb0a56ddc68cd2151cb7fbe10e58655d158c9bffd38c0c1a8d6b82) |
-| 7 | Wallet A | Replay activation rejected; active state unchanged | [`0xbd3a7512...453b6`](https://explorer-studio-dev.genlayer.com/transactions/0xbd3a75129914eda6324ec89a4729602b4bbdb3b6d4b40318175d0940554453b6) |
-| 8 | Wallet A | Create adversarial proposal `2` with independent baseline | [`0x156f0047...7a41b`](https://explorer-studio-dev.genlayer.com/transactions/0x156f00470d72ad68bbe0308eeed72e78b91576d00f4535c1555c386c8b47a41b) |
-| 9 | Wallet B | Propose revision `4` whose summary hides recipient and amount changes | [`0x4ae95e09...e813`](https://explorer-studio-dev.genlayer.com/transactions/0x4ae95e095a2ceda37b330a0023366c925e726b0cfae2e0706d72bef26fdae813) |
-| 10 | Wallet B | Adversarial assessment returns `HIDDEN_MATERIAL_CHANGE`; revision becomes `BLOCKED` | [`0xd8e3292d...c788`](https://explorer-studio-dev.genlayer.com/transactions/0xd8e3292d04192a3887fb52ffb4718b78cdaf75648b1d4dce07a6ce60f2bbc788) |
-| 11 | Wallet A | Blocked activation rejected with `REVISION_NOT_CERTIFIED`; no mutation | [`0xc26f0922...a157`](https://explorer-studio-dev.genlayer.com/transactions/0xc26f09221b22d02d36e271ca0fbc78840e2c1f33bb2b7a737cab58dea5dba157) |
+| 1 | Wallet A | Create proposal 1 and complete execution manifest; baseline revision 1 `ACTIVE` | [`0x425f78d2…d293fb`](https://explorer-studio-dev.genlayer.com/transactions/0x425f78d2735b24b7b1d0c9588db88d5272bb6427febccf9943e287bbb8d293fb) |
+| 2 | Wallet B | Propose revision 2 against exact parent; deterministic diff is `AMOUNT` | [`0x54eeb4cf…b986a5`](https://explorer-studio-dev.genlayer.com/transactions/0x54eeb4cf25626f0bbd33c8beb0812a9f9e9b9de6c7ef9af355eadac710b986a5) |
+| 3 | Wallet B | Stale assessment rejected; candidate state unchanged | [`0x22d9eb49…53cce5`](https://explorer-studio-dev.genlayer.com/transactions/0x22d9eb4986e104648452bbb5935931cbdfb0dd377254612a8fe0c2163653cce5) |
+| 4 | Wallet B | Exact assessment returns `FULLY_DISCLOSED`; revision 2 becomes `CERTIFIED` | [`0x81930f08…1a834b`](https://explorer-studio-dev.genlayer.com/transactions/0x81930f0896d2ac36dc270495e8a8d6553b2626dc28ef931ea23b0902121a834b) |
+| 5 | Wallet B | Unauthorized activation rejected; proposal pointer unchanged | [`0xe05aae09…7b9a38`](https://explorer-studio-dev.genlayer.com/transactions/0xe05aae0997e1e4a8bb9a9466d88f57fedf69b554071ba3a99cebfc9fd47b9a38) |
+| 6 | Wallet A | Activate revision 2; parent superseded, child active, authorization queued | [`0x41bdad3e…a8e154`](https://explorer-studio-dev.genlayer.com/transactions/0x41bdad3eaec780fcb099978ae0b1f04de9895e36ca588b61b9ae66141aa8e154) |
+| 7 | Wallet A | Replay activation rejected; active revision and authorization count unchanged | [`0x17a6c57b…f9887b`](https://explorer-studio-dev.genlayer.com/transactions/0x17a6c57b5efed39a2b71272eda58982894662625581cb9c8ffd0ce7e16f9887b) |
+| 8 | Wallet A | Create adversarial proposal 2 with independent baseline and nonce | [`0x0da82953…16f610`](https://explorer-studio-dev.genlayer.com/transactions/0x0da829531dac4a2d67a5897dbd3992f9d0ec2af27f496365af526f0ddf16f610) |
+| 9 | Wallet B | Propose hidden recipient, amount and nonce changes under “formatting only” label | [`0x2b015175…eb7d68`](https://explorer-studio-dev.genlayer.com/transactions/0x2b015175981e9ba869ddb5b7096bc8344ea0590b996f114a31d8c19c48eb7d68) |
+| 10 | Wallet B | Semantic assessment returns `HIDDEN_MATERIAL_CHANGE`; revision 4 `BLOCKED` | [`0xe38131b9…27effc`](https://explorer-studio-dev.genlayer.com/transactions/0xe38131b966b3abbbf56b77342026cef10ecd8c5d53152e1fa21939edc427effc) |
+| 11 | Wallet A | Blocked activation rejected; no second authorization or downstream effect | [`0x1fa0a4b6…0ae429`](https://explorer-studio-dev.genlayer.com/transactions/0x1fa0a4b6eec552158e4cb3988b0421ed1b59fd4827ec36e01fddd96b9d0ae429) |
 
-## Final readback
+## Downstream enforcement readback
 
-`get_counts()` returned `2 proposals / 4 revisions / 2 assessments`.
+After transaction 6 finalized, ScopeSentinel execution record 1 was `EXECUTION_QUEUED`. The finalized cross-contract message reached the constructor-bound executor, whose execution record 1 is `EXECUTED` with the same proposal ID, revision ID, manifest digest, action and authorization receipt. Its recipient allocation is exactly `1200`.
 
-- Proposal 1 points to revision 2; revision 1 is `SUPERSEDED`, revision 2 is `ACTIVE`.
-- Assessment 1 is `FULLY_DISCLOSED`, with deterministic action diff present and disclosed, and `summary_complete = true`.
-- Revision 4 has deterministic diff fields `RECIPIENT` and `AMOUNT`.
-- Assessment 2 is `HIDDEN_MATERIAL_CHANGE`, with `summary_complete = false` and `scope_expanded = true`; revision 4 is `BLOCKED`.
-- Stale, unauthorized, replay, and blocked calls finalized with their expected errors and did not mutate the protected state.
+Final state:
 
-Programmatic live E2E result: **PASS**. Browser-wallet behavior is supported by the frontend but is not misrepresented here as automated browser evidence.
+- Guard: `2 proposals / 4 revisions / 2 assessments / 1 execution`.
+- Executor: `1 execution / total_authorized 1200`.
+- Executor guard: `0x944ED2e5D14C81c3D1Cb0B09efd7e091C3013885`.
+- Happy revision: `ACTIVE`; parent: `SUPERSEDED`.
+- Adversarial revision: `BLOCKED` with deterministic `RECIPIENT`, `AMOUNT`, and `NONCE` diffs.
+- Stale, unauthorized, replay, and blocked attempts finalized without protected-state mutation.
 
-## Source parity and reproducibility
+Programmatic two-wallet SDK E2E result: **PASS**.
 
-The active address was deployed from `contracts/scope_sentinel.py` after the effect-aligned comparator fix. Run `node scripts/inspect_state.mjs 0xA198744fd4A6479019EEea2E27195f8546EDB176` for the finalized readback. The retired pre-fix address is documented in `docs/SUPERSEDED_DEPLOYMENTS.md` and is not the submitted release.
+## Reproduce
+
+```powershell
+node scripts/inspect_state.mjs 0x944ED2e5D14C81c3D1Cb0B09efd7e091C3013885 0xF6c1Df76C59244268af9D5608486740DBe50D109
+```
+
+Private keys are never stored or published. The runner accepts them only through hidden terminal prompts.

@@ -2,9 +2,12 @@
 
 ScopeSentinel is a GenLayer dApp that prevents a DAO proposal revision from becoming canonical when its human change summary hides a material semantic or executable change.
 
-**Currently published V1 app:** [scope-sentinel.thanhha68199.workers.dev](https://scope-sentinel.thanhha68199.workers.dev)
+**Live app:** [scope-sentinel-frontend.thanhha68199.workers.dev](https://scope-sentinel-frontend.thanhha68199.workers.dev)
 
-**Currently published V1 contract:** [`0xA198744fd4A6479019EEea2E27195f8546EDB176`](https://explorer-studio-dev.genlayer.com/address/0xA198744fd4A6479019EEea2E27195f8546EDB176) on GenLayer Studio Next. Its historical two-wallet trail is in [`docs/LIVE_EVIDENCE.md`](docs/LIVE_EVIDENCE.md). **Do not resubmit these V1 links as evidence for the V2 execution-boundary fix.** V2 source and local verification are complete; new deployment and live E2E evidence are pending.
+**Live V2 guard:** [`0x944ED2e5D14C81c3D1Cb0B09efd7e091C3013885`](https://explorer-studio-dev.genlayer.com/address/0x944ED2e5D14C81c3D1Cb0B09efd7e091C3013885)  
+**Bound executor:** [`0xF6c1Df76C59244268af9D5608486740DBe50D109`](https://explorer-studio-dev.genlayer.com/address/0xF6c1Df76C59244268af9D5608486740DBe50D109)
+
+The complete V2 two-wallet trail and downstream execution readback are in [`docs/LIVE_EVIDENCE.md`](docs/LIVE_EVIDENCE.md).
 
 The contract seals exact parent/revision text and complete execution manifests on-chain. Deterministic code compares executor, destination, chain, raw calldata digest, recipient, asset, value, amount, nonce, and execution window. Validators judge only whether the prose summary completely discloses semantic changes. Activation atomically consumes the certified revision and emits a finalized, one-time authorization to a guarded executor contract.
 
@@ -54,14 +57,14 @@ finalized IC message -> guarded executor EXECUTED
 .\verify.ps1
 ```
 
-Current V2 local verification result (new deployment evidence pending):
+Current V2 verification result:
 
-- Contract: `22 passed`
+- Contract: `25 passed`
 - GenVM linter: both contracts, `3 checks passed` each
 - Frontend state tests: `3 passed`
 - TypeScript/Vite production build: passed
 
-Live SDK E2E also passed on the release address: 2 proposals, 4 revisions, 2 assessments, with happy, stale, unauthorized, replay, hidden-change and blocked-activation paths finalized. See `docs/LIVE_EVIDENCE.md`; browser-wallet automation is not claimed.
+Live SDK E2E passed on both V2 release contracts: 2 proposals, 4 revisions, 2 assessments, 1 queued authorization, 1 downstream execution and allocation `1200`. Happy, stale, unauthorized, replay, hidden-change and blocked-activation paths finalized. See `docs/LIVE_EVIDENCE.md`; browser-wallet automation is not claimed.
 
 ## Repository map
 
