@@ -26,6 +26,12 @@ def test_manifest_diff_is_deterministic(runtime):
     _,c,g,_,_=runtime;assert int(proposed(c,g))==2;r=c.get_revision(2)
     assert r["diff_fields"]==["AMOUNT"] and r["parent_manifest_digest"]==c.get_revision(1)["manifest_digest"]
 
+def test_complete_manifest_rejects_missing_calldata_and_window(runtime):
+    _,c,_,_,_=runtime;bad={k:v for k,v in MANIFEST[0].items() if k!="calldata"}
+    assert c.create_proposal("Valid proposal",BASE,json.dumps([bad]))=="INVALID_MANIFEST"
+    bad={**MANIFEST[0],"valid_until":bad.get("valid_after",1700000000)}
+    assert c.create_proposal("Valid proposal",BASE,json.dumps([bad]))=="INVALID_MANIFEST"
+
 def test_fully_disclosed_action_change_certifies(runtime):
     _,c,g,_,_=runtime;proposed(c,g);aid=c.assess_revision(2,2);a=c.get_assessment(aid)
     assert c.get_revision(2)["status"]=="CERTIFIED" and a["action_diff_present"] and a["action_diff_disclosed"]
@@ -57,6 +63,12 @@ def test_only_creator_activates_certified_revision(runtime):
     assert c.activate_revision(1,2,2)=="ONLY_PROPOSAL_CREATOR" and c.get_proposal(1)==before
     set_sender(g,CREATOR);assert c.activate_revision(1,2,2)=="ACTIVE"
     assert c.get_revision(1)["status"]=="SUPERSEDED" and c.get_revision(2)["status"]=="ACTIVE"
+    assert c.get_counts()["executions"]==1 and c.get_execution(1)["status"]=="EXECUTION_QUEUED"
+    assert len(g.emitted)==1 and g.emitted[0][0]==EXECUTOR
+
+def test_activation_checks_chain_and_window_before_mutation(runtime):
+    _,c,g,_,_=runtime;proposed(c,g);c.assess_revision(2,2);set_sender(g,CREATOR);g.message_raw["chain_id"]=1;before=c.get_proposal(1)
+    assert c.activate_revision(1,2,2)=="CHAIN_MISMATCH" and c.get_proposal(1)==before and c.get_counts()["executions"]==0
 
 def test_blocked_revision_cannot_activate(runtime):
     _,c,g,n,_=runtime;proposed(c,g);n.answer={"decision":"AMBIGUOUS","material_changes":["PURPOSE"],"summary_complete":False,"semantic_scope_expanded":False};c.assess_revision(2,2);set_sender(g,CREATOR);before=c.get_proposal(1)
@@ -78,3 +90,4 @@ def test_source_architecture_guards():
     assert "web.render" not in s and "strict_eq" not in s and "owner" not in s.lower() and "admin" not in s.lower()
     assert "Differences among non-consequential diagnostic categories are acceptable" in s
     assert "non-empty deterministic action diff always requires EXECUTION_ACTION" in s
+    assert "execute_authorized" in s and "calldata_sha256" in s and "valid_until" in s

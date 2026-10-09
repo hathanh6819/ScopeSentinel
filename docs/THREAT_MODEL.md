@@ -10,6 +10,10 @@
 | Validator malformed output/disagreement | Audited `CONSENSUS_UNRESOLVED`; no privilege |
 | Reviewer activates someone else's proposal | Only per-proposal creator may activate |
 | Certified revision replay | Atomic status transition and active-parent update |
+| Partial manifest hides actual bytes or execution context | Exact calldata, chain, executor, destination, value, nonce and validity window are mandatory and digest-bound |
+| Registry certificate ignored by execution layer | Activation emits a finalized message to a guard-bound executor |
+| Direct or replayed executor call | Executor authenticates ScopeSentinel sender and rejects used authorization receipts |
+| Wrong chain or expired authorization | Activation checks current chain and validity window before any state mutation |
 | Frontend uses aggregate counter as selected object | IDs are returned/read from proposal records and selected through cards |
 | UI reports submission as success | Client waits `FINALIZED`, checks execution/consensus, then refreshes state |
 

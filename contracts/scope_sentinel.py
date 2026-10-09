@@ -6,7 +6,7 @@ from datetime import datetime
 
 SHA256=re.compile(r"^sha256:[0-9a-f]{64}$")
 ADDRESS=re.compile(r"^0x[0-9a-f]{40}$")
-SELECTOR=re.compile(r"^0x[0-9a-f]{8}$")
+CALLDATA=re.compile(r"^0x[0-9a-f]{8,2048}$")
 ALLOWED_CHANGES=["AUTHORITY_SCOPE","BENEFICIARY","CONDITION","DURATION","EXECUTION_ACTION","PURPOSE"]
 BASELINE_ACTIVE="BASELINE_ACTIVE";PROPOSED="REVISION_PROPOSED";CERTIFIED="CERTIFIED";BLOCKED="BLOCKED"
 UNRESOLVED="CONSENSUS_UNRESOLVED";ACTIVE="ACTIVE";SUPERSEDED="SUPERSEDED"
@@ -23,22 +23,23 @@ def normalize_manifest(raw):
     if type(m) is not list or len(m)>4:return None
     out=[]
     for a in m:
-        if type(a) is not dict or set(a)!={"target","selector","value","asset","recipient","amount"}:return None
-        target=str(a["target"]).strip().lower();selector=str(a["selector"]).strip().lower();asset_raw=str(a["asset"]).strip();asset="NATIVE" if asset_raw.upper()=="NATIVE" else asset_raw.lower();recipient=str(a["recipient"]).strip().lower()
-        if not ADDRESS.fullmatch(target) or not SELECTOR.fullmatch(selector):return None
+        required={"executor","target","chain_id","calldata","value","asset","recipient","amount","nonce","valid_after","valid_until"}
+        if type(a) is not dict or set(a)!=required:return None
+        executor=str(a["executor"]).strip().lower();target=str(a["target"]).strip().lower();calldata=str(a["calldata"]).strip().lower();asset_raw=str(a["asset"]).strip();asset="NATIVE" if asset_raw.upper()=="NATIVE" else asset_raw.lower();recipient=str(a["recipient"]).strip().lower()
+        if not ADDRESS.fullmatch(executor) or executor=="0x"+"0"*40 or not ADDRESS.fullmatch(target) or target=="0x"+"0"*40 or not CALLDATA.fullmatch(calldata) or len(calldata)%2!=0:return None
         if asset!="NATIVE" and not ADDRESS.fullmatch(asset):return None
         if not ADDRESS.fullmatch(recipient):return None
-        try:value=int(a["value"]);amount=int(a["amount"])
+        try:value=int(a["value"]);amount=int(a["amount"]);chain_id=int(a["chain_id"]);nonce=int(a["nonce"]);valid_after=int(a["valid_after"]);valid_until=int(a["valid_until"])
         except Exception:return None
-        if value<0 or amount<0 or value>10**30 or amount>10**30:return None
-        out.append({"target":target,"selector":selector,"value":value,"asset":asset,"recipient":recipient,"amount":amount})
-    return sorted(out,key=lambda x:(x["target"],x["selector"],x["recipient"],x["asset"],x["value"],x["amount"]))
+        if value<0 or amount<0 or value>10**30 or amount>10**30 or chain_id<1 or nonce<1 or valid_after<0 or valid_until<=valid_after:return None
+        out.append({"executor":executor,"target":target,"chain_id":chain_id,"calldata":calldata,"calldata_sha256":sha(calldata),"value":value,"asset":asset,"recipient":recipient,"amount":amount,"nonce":nonce,"valid_after":valid_after,"valid_until":valid_until})
+    return sorted(out,key=lambda x:(x["executor"],x["target"],x["nonce"],x["calldata_sha256"]))
 
 def manifest_diff(old,new):
     fields=[]
     if old==new:return fields
     if len(old)!=len(new):fields.append("ACTION_COUNT")
-    for key,label in [("target","TARGET"),("selector","SELECTOR"),("value","VALUE"),("asset","ASSET"),("recipient","RECIPIENT"),("amount","AMOUNT")]:
+    for key,label in [("executor","EXECUTOR"),("target","TARGET"),("chain_id","CHAIN"),("calldata_sha256","CALLDATA"),("value","VALUE"),("asset","ASSET"),("recipient","RECIPIENT"),("amount","AMOUNT"),("nonce","NONCE"),("valid_after","VALID_AFTER"),("valid_until","VALID_UNTIL")]:
         if [x.get(key) for x in old]!=[x.get(key) for x in new]:fields.append(label)
     return fields
 
@@ -49,10 +50,12 @@ class ScopeSentinel(gl.Contract):
     proposals:TreeMap[u256,str]
     revisions:TreeMap[u256,str]
     assessments:TreeMap[u256,str]
+    execution_count:u256
+    executions:TreeMap[u256,str]
 
     def __init__(self):
         self.proposal_count=u256(0);self.revision_count=u256(0);self.assessment_count=u256(0)
-        self.proposals=TreeMap[u256,str]();self.revisions=TreeMap[u256,str]();self.assessments=TreeMap[u256,str]()
+        self.proposals=TreeMap[u256,str]();self.revisions=TreeMap[u256,str]();self.assessments=TreeMap[u256,str]();self.execution_count=u256(0);self.executions=TreeMap[u256,str]()
     def _proposal(self,pid):
         if int(pid)<1 or int(pid)>int(self.proposal_count):return None
         return json.loads(self.proposals[pid])
@@ -126,8 +129,18 @@ class ScopeSentinel(gl.Contract):
         if p["revision"]!=int(expected_proposal_revision):return "STALE_PROPOSAL_REVISION"
         if r["status"]!=CERTIFIED:return "REVISION_NOT_CERTIFIED"
         if r["parent_revision_id"]!=p["active_revision_id"]:return "PARENT_NOT_ACTIVE"
+        current_time=now();chain_id=int(gl.message_raw.get("chain_id",61997))
+        for action in r["manifest"]:
+            if action["chain_id"]!=chain_id:return "CHAIN_MISMATCH"
+            if current_time<action["valid_after"] or current_time>=action["valid_until"]:return "EXECUTION_WINDOW_CLOSED"
         old=self._revision(u256(p["active_revision_id"]));old["status"]=SUPERSEDED;self._saver(old)
-        r["status"]=ACTIVE;r["activated_at"]=now();self._saver(r);p["active_revision_id"]=r["id"];p["status"]=BASELINE_ACTIVE;p["revision"]+=1;self._savep(p);return ACTIVE
+        r["status"]=ACTIVE;r["activated_at"]=current_time;self._saver(r);p["active_revision_id"]=r["id"];p["status"]=BASELINE_ACTIVE;p["revision"]+=1;self._savep(p)
+        for action in r["manifest"]:
+            eid=u256(int(self.execution_count)+1);self.execution_count=eid
+            receipt=sha(canon({"proposal_id":int(proposal_id),"revision_id":int(revision_id),"manifest_digest":r["manifest_digest"],"action":action}))
+            self.executions[eid]=canon({"id":int(eid),"proposal_id":int(proposal_id),"revision_id":int(revision_id),"executor":action["executor"],"action_nonce":action["nonce"],"manifest_digest":r["manifest_digest"],"authorization_receipt":receipt,"status":"EXECUTION_QUEUED","created_at":current_time})
+            gl.get_contract_at(Address(action["executor"])).emit(on="finalized").execute_authorized(int(proposal_id),int(revision_id),r["manifest_digest"],canon(action),receipt)
+        return ACTIVE
 
     @gl.public.view
     def get_proposal(self,proposal_id:u256)->dict:return self._proposal(proposal_id) or {}
@@ -138,8 +151,12 @@ class ScopeSentinel(gl.Contract):
         if int(assessment_id)<1 or int(assessment_id)>int(self.assessment_count):return {}
         return json.loads(self.assessments[assessment_id])
     @gl.public.view
-    def get_counts(self)->dict:return {"proposals":int(self.proposal_count),"revisions":int(self.revision_count),"assessments":int(self.assessment_count)}
+    def get_execution(self,execution_id:u256)->dict:
+        if int(execution_id)<1 or int(execution_id)>int(self.execution_count):return {}
+        return json.loads(self.executions[execution_id])
     @gl.public.view
-    def get_protocol(self)->dict:return {"name":"ScopeSentinel","version":1,"architecture":"immutable-parent-diff-semantic-disclosure-activation-gate","constructor_roles":False,"custody":False,"external_sources":False}
+    def get_counts(self)->dict:return {"proposals":int(self.proposal_count),"revisions":int(self.revision_count),"assessments":int(self.assessment_count),"executions":int(self.execution_count)}
+    @gl.public.view
+    def get_protocol(self)->dict:return {"name":"ScopeSentinel","version":2,"architecture":"immutable-parent-diff-semantic-disclosure-enforced-execution","constructor_roles":False,"custody":False,"external_sources":False,"execution_boundary":"FINALIZED_CROSS_CONTRACT_MESSAGE"}
 
 Contract=ScopeSentinel

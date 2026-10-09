@@ -1,12 +1,12 @@
 # Verification
 
-## Local results — 2026-10-06
+## Local V2 results — 2026-10-09
 
 | Layer | Command | Result |
 |---|---|---|
-| Contract direct/adversarial | `python -m pytest tests -q` | 20 passed |
-| GenVM compatibility | `python -X utf8 -m genvm_linter.cli contracts/scope_sentinel.py` | passed, 3 checks |
-| Frontend state rules | `npm test` | 2 passed |
+| Contract direct/adversarial | `python -m pytest tests -q` | 24 passed |
+| GenVM compatibility | lint `contracts/scope_sentinel.py` and `contracts/guarded_executor.py` | passed, 3 checks each |
+| Frontend state rules | `npm test` | 3 passed |
 | Production frontend | `npm run build` | passed |
 
 ## Behavioral coverage
@@ -15,6 +15,9 @@
 - input and manifest schema/bounds;
 - active parent, digest and revision binding;
 - deterministic manifest diff;
+- complete manifest schema, calldata commitment, chain/window validation;
+- atomic queued authorization and finalized cross-contract message;
+- executor sender authentication, allocation effect, and receipt replay rejection;
 - fully disclosed and editorial certification;
 - positive-model bypass killed when action change is not disclosed;
 - hidden material change blocked;
@@ -24,9 +27,9 @@
 - blocked activation, stale activation, replay and cross-object rejection;
 - failure paths assert no relevant mutation.
 
-## Live release gate
+## Historical V1 live release gate
 
-Complete for programmatic SDK E2E on `0xA198744fd4A6479019EEea2E27195f8546EDB176`.
+Complete for historical V1 programmatic SDK E2E on `0xA198744fd4A6479019EEea2E27195f8546EDB176`. This does not evidence the V2 execution-boundary fix and must not be used for resubmission.
 
 - Exact address and deployment transaction recorded.
 - Two ordinary test wallets exercised independent creator/reviewer roles; deployer has no protocol authority.
@@ -37,3 +40,7 @@ Complete for programmatic SDK E2E on `0xA198744fd4A6479019EEea2E27195f8546EDB176
 - Final readback: 2 proposals, 4 revisions, 2 assessments.
 
 Explorer links and readbacks: [`LIVE_EVIDENCE.md`](LIVE_EVIDENCE.md). Browser-wallet automation is not claimed.
+
+## V2 live release gate
+
+Pending new ScopeSentinel and GuardedScopeExecutor deployment, two-wallet E2E, downstream allocation readback, frontend address update, and Cloudflare publication.
